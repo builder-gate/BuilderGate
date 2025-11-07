@@ -36,7 +36,7 @@ const connectors = [
     projectId,
     showQrModal: true,
     metadata: {
-      name: process.env.NEXT_PUBLIC_SITE_NAME || 'BuilderGate',
+      name: process.env.NEXT_PUBLIC_SITE_NAME || 'AppMokup',
       description: 'Farcaster Mini App with WalletConnect',
       url: process.env.NEXT_PUBLIC_SITE_URL || '',
       icons: [`${process.env.NEXT_PUBLIC_SITE_URL}/icon.png`],
