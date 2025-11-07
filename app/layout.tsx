@@ -1,49 +1,36 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
+import { Geist, Geist_Mono } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
+import { ThemeProvider } from "@/components/theme-provider"
 import { WagmiConfig } from "@/providers/wagmi-provider"
-import { SdkInitializer } from "@/components/sdk-initializer"
 import { FarcasterProvider } from "@/contexts/FarcasterContext"
+import "./globals.css"
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter"
-})
+const _geist = Geist({ subsets: ["latin"] })
+const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "BuilderGate - Farcaster Mini App",
-  description: "Farcaster Mini App with WalletConnect integration",
-  generator: 'BuilderGate',
-  keywords: ['wallet', 'farcaster', 'walletconnect', 'blockchain', 'web3', 'dapp'],
-  authors: [{ name: 'BuilderGate' }],
-  openGraph: {
-    title: "BuilderGate - Farcaster Mini App",
-    description: "Farcaster Mini App with WalletConnect integration",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "",
-    siteName: "BuilderGate",
-    images: [
-      {
-        url: `${process.env.NEXT_PUBLIC_SITE_URL}/banner.png`,
-        width: 1200,
-        height: 630,
-        alt: "BuilderGate - Farcaster Mini App"
-      }
-    ],
-    locale: "en_US",
-    type: "website"
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "BuilderGate - Farcaster Mini App",
-    description: "Farcaster Mini App with WalletConnect integration",
-    images: [`${process.env.NEXT_PUBLIC_SITE_URL}/banner.png`]
-  },
+  title: "BuilderGate",
+  description: "Complete identity verifications to receive BuilderGate tokens",
+  generator: "v0.app",
   icons: {
-    icon: "/icon.png",
-    apple: "/icon.png"
-  }
+    icon: [
+      {
+        url: "/icon-light-32x32.png",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        url: "/icon-dark-32x32.png",
+        media: "(prefers-color-scheme: dark)",
+      },
+      {
+        url: "/icon.svg",
+        type: "image/svg+xml",
+      },
+    ],
+    apple: "/apple-icon.png",
+  },
 }
 
 export default function RootLayout({
@@ -53,13 +40,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={`font-sans antialiased`} suppressHydrationWarning>
         <WagmiConfig>
           <FarcasterProvider>
-            <SdkInitializer />
-            {children}
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+              {children}
+            </ThemeProvider>
           </FarcasterProvider>
         </WagmiConfig>
+        <Analytics />
       </body>
     </html>
   )

@@ -1,186 +1,238 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { useAccount, useBalance } from 'wagmi'
-import { ConnectButton } from '@/components/ConnectButton'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { usePlatformDetection } from '@/hooks/usePlatformDetection'
-import { useFarcaster } from '@/contexts/FarcasterContext'
-import { Wallet, Smartphone, Globe, User } from 'lucide-react'
+import { useState } from "react"
+import { VerificationCard } from "@/components/verification-card"
+import { VerificationModal } from "@/components/verification-modal"
+import { TokenCard } from "@/components/token-card"
+import { TokenSwapModal } from "@/components/token-swap-modal"
+import { VaultModal } from "@/components/vault-modal"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { ConnectButton } from "@/components/ConnectButton"
+import { BuilderScoreCard } from "@/components/builder-score-card"
+import { Shield, Zap, Users, TrendingUp } from "lucide-react"
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false)
-  const { address, isConnected } = useAccount()
-  const { data: balance } = useBalance({ address })
-  const { platform, isBrowser, isFarcasterBrowser, isFarcasterMobile } = usePlatformDetection()
-  const { user, isAuthenticated } = useFarcaster()
+  const [verifications, setVerifications] = useState({
+    talentProtocol: false,
+    github: false,
+    selfProtocol: false,
+  })
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const [tokenBalance, setTokenBalance] = useState(1000)
+  const [builderScore, setBuilderScore] = useState(0)
 
-  if (!mounted) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
-        <div className="w-full max-w-2xl space-y-8">
-          <div className="text-center space-y-2">
-            <h1 className="text-4xl font-bold tracking-tight">
-              BuilderGate - Farcaster Mini App
-            </h1>
-            <p className="text-muted-foreground">
-              Multi-platform wallet connection with Farcaster SDK and WalletConnect.
-            </p>
-          </div>
-        </div>
-      </main>
-    )
+  const [activeModal, setActiveModal] = useState<string | null>(null)
+  const [showSwapModal, setShowSwapModal] = useState(false)
+  const [showVaultModal, setShowVaultModal] = useState(false)
+
+  const platforms = [
+    {
+      id: "talentProtocol",
+      title: "Talent Protocol",
+      logo: "/images/talent-protocol.png",
+      endpoint: "/api/verify/talent-protocol",
+    },
+    {
+      id: "github",
+      title: "GitHub",
+      logo: "/images/github.png",
+      endpoint: "/api/verify/github",
+    },
+    {
+      id: "selfProtocol",
+      title: "Self Protocol",
+      logo: "/images/self-protocol.png",
+      endpoint: "/api/verify/self-protocol",
+    },
+  ]
+
+  const allVerified = Object.values(verifications).every((v) => v)
+
+  const handleVerifySuccess = (platformId: string) => {
+    setVerifications((prev) => ({
+      ...prev,
+      [platformId]: true,
+    }))
+    const newVerifications = {
+      ...verifications,
+      [platformId]: true,
+    }
+    const verifiedCount = Object.values(newVerifications).filter(Boolean).length
+    if (verifiedCount === 3) {
+      setBuilderScore(Math.floor(Math.random() * 500) + 500)
+    }
+  }
+
+  const handleSwapComplete = (newBalance: number) => {
+    setTokenBalance(newBalance)
+  }
+
+  const handleVaultAction = (action: "stake" | "unstake", amount: number) => {
+    if (action === "stake") {
+      setTokenBalance((prev) => prev - amount)
+    } else {
+      setTokenBalance((prev) => prev + amount)
+    }
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-6 bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
-      <div className="w-full max-w-2xl space-y-8">
+    <main className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">
-            BuilderGate - Farcaster Mini App
-          </h1>
-          <p className="text-muted-foreground">
-            Multi-platform wallet connection with Farcaster SDK and WalletConnect.
+        <div className="text-center mb-16 relative">
+          <div className="absolute right-0 top-0 flex items-center gap-2">
+            <ConnectButton />
+            <ThemeToggle />
+          </div>
+
+          <div className="flex items-center justify-center gap-3 mb-4 pt-10">
+            <Shield
+              className="w-10 h-10 [&>path]:stroke-black dark:[&>path]:stroke-transparent"
+              style={{ fill: "#f4ff00", strokeWidth: 2 }}
+            />
+            <h1 className="text-5xl font-bold tracking-tight">BuilderGate</h1>
+          </div>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+            Reputation-Gated Yield Distribution for Web3 Builders
+          </p>
+          <p className="text-base text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+            Prove your contributions. Access exclusive yield. No applications, no governance votes, just verifiable
+            reputation.
           </p>
         </div>
 
-        {/* Connect Button */}
-        <div className="flex justify-center">
-          <ConnectButton />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div className="bg-card rounded-xl p-6 border border-border">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+              <Shield className="w-6 h-6 text-primary stroke-black dark:stroke-primary" strokeWidth={2.5} />
+            </div>
+            <h3 className="text-lg font-semibold mb-2 text-balance">Reputation-Gated Vault</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Access yield by proving meaningful Web3 contributions through zkProofs and attestations
+            </p>
+          </div>
+
+          <div className="bg-card rounded-xl p-6 border border-border">
+            <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
+              <Zap className="w-6 h-6 text-accent stroke-black dark:stroke-accent" strokeWidth={2.5} />
+            </div>
+            <h3 className="text-lg font-semibold mb-2 text-balance">Yield Donating Strategy</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Powered by Uniswap v4 hooks that redirect protocol fees into an ERC-4626 vault
+            </p>
+          </div>
+
+          <div className="bg-card rounded-xl p-6 border border-border">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+              <Users className="w-6 h-6 text-primary stroke-black dark:stroke-primary" strokeWidth={2.5} />
+            </div>
+            <h3 className="text-lg font-semibold mb-2 text-balance">Builder-First Design</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Built for developers, maintainers, and technical creators—not passive capital providers
+            </p>
+          </div>
+
+          <div className="bg-card rounded-xl p-6 border border-border">
+            <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
+              <TrendingUp className="w-6 h-6 text-accent stroke-black dark:stroke-accent" strokeWidth={2.5} />
+            </div>
+            <h3 className="text-lg font-semibold mb-2 text-balance">Impact-Based Rewards</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Dynamic yield scaling based on contributor impact via tokenized allocation mechanisms
+            </p>
+          </div>
         </div>
 
-        {/* Platform Info Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2" suppressHydrationWarning>
-              {isBrowser && <Globe className="h-5 w-5" />}
-              {isFarcasterBrowser && <Globe className="h-5 w-5 text-purple-500" />}
-              {isFarcasterMobile && <Smartphone className="h-5 w-5 text-purple-500" />}
-              Platform Detection
-            </CardTitle>
-            <CardDescription>
-              Current platform: <span className="font-semibold">{platform}</span>
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Environment</p>
-                <p className="text-sm text-muted-foreground">
-                  {isBrowser && "Standard Browser"}
-                  {isFarcasterBrowser && "Farcaster Browser"}
-                  {isFarcasterMobile && "Farcaster Mobile"}
-                </p>
+        <div className="bg-card rounded-2xl p-8 border border-border mb-16">
+          <h2 className="text-3xl font-bold mb-6 text-center">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                1
               </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Farcaster Auth</p>
-                <p className="text-sm text-muted-foreground">
-                  {isAuthenticated ? "✅ Authenticated" : "❌ Not Authenticated"}
-                </p>
-              </div>
+              <h3 className="text-xl font-semibold mb-3">Verify Your Reputation</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Connect your GitHub, Talent Protocol builder score, and Self Protocol proof of humanity to validate your
+                contributions
+              </p>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Farcaster User Card */}
-        {isAuthenticated && user && (
-          <Card className="border-purple-200 dark:border-purple-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2" suppressHydrationWarning>
-                <User className="h-5 w-5 text-purple-500" />
-                Farcaster User
-              </CardTitle>
-              <CardDescription>Connected via Farcaster SDK</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4">
-                {user.pfpUrl && (
-                  <img
-                    src={user.pfpUrl}
-                    alt={user.username}
-                    className="h-16 w-16 rounded-full"
-                  />
-                )}
-                <div className="space-y-1">
-                  <p className="font-semibold">{user.displayName}</p>
-                  <p className="text-sm text-muted-foreground">@{user.username}</p>
-                  <p className="text-xs text-muted-foreground">FID: {user.fid}</p>
-                </div>
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                2
               </div>
-              {user.bio && (
-                <p className="text-sm text-muted-foreground border-t pt-4">
-                  {user.bio}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        )}
+              <h3 className="text-xl font-semibold mb-3">Receive BGT Tokens</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Once verified, automatically receive BuilderGate tokens based on your reputation score multiplier
+              </p>
+            </div>
 
-        {/* Wallet Info Card */}
-        {isConnected && address && (
-          <Card className="border-green-200 dark:border-green-800">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2" suppressHydrationWarning>
-                <Wallet className="h-5 w-5 text-green-500" />
-                Wallet Connected
-              </CardTitle>
-              <CardDescription>Your wallet details</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Address</p>
-                  <p className="text-sm text-muted-foreground font-mono break-all">
-                    {address}
-                  </p>
-                </div>
-                {balance && (
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Balance</p>
-                    <p className="text-sm text-muted-foreground">
-                      {parseFloat(balance.formatted).toFixed(4)} {balance.symbol}
-                    </p>
-                  </div>
-                )}
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                3
               </div>
-            </CardContent>
-          </Card>
-        )}
+              <h3 className="text-xl font-semibold mb-3">Access Yield & Trade</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Stake tokens to earn yield from protocol fees, or swap them in the Builder/ETH pool
+              </p>
+            </div>
+          </div>
+        </div>
 
-        {/* Features Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Supported Features</CardTitle>
-            <CardDescription>
-              This template supports multiple wallet connection methods
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-purple-500" />
-                <span>Farcaster SDK (auto-connects in Farcaster environment)</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
-                <span>WalletConnect v2 (QR code & mobile wallets)</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-orange-500" />
-                <span>Injected wallets (MetaMask, etc.)</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-gray-500" />
-                <span>Platform detection (browser/farcaster browser/mobile)</span>
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
+        {/* Verification Cards */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-semibold mb-6 text-center">Identity Verification</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <BuilderScoreCard score={builderScore} verified={allVerified} />
+
+            {platforms.map((platform) => (
+              <VerificationCard
+                key={platform.id}
+                title={platform.title}
+                logo={platform.logo}
+                endpoint={platform.endpoint}
+                verified={verifications[platform.id as keyof typeof verifications]}
+                onVerify={() => setActiveModal(platform.id)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Token Card */}
+        <div className="max-w-2xl mx-auto">
+          <TokenCard
+            enabled={allVerified}
+            balance={tokenBalance}
+            onSwapClick={() => setShowSwapModal(true)}
+            onVaultClick={() => setShowVaultModal(true)}
+          />
+        </div>
+
+        {/* Verification Modals */}
+        {platforms.map((platform) => (
+          <VerificationModal
+            key={platform.id}
+            open={activeModal === platform.id}
+            onOpenChange={(open) => !open && setActiveModal(null)}
+            title={platform.title}
+            endpoint={platform.endpoint}
+            onSuccess={() => handleVerifySuccess(platform.id)}
+          />
+        ))}
+
+        <TokenSwapModal
+          open={showSwapModal}
+          onOpenChange={setShowSwapModal}
+          currentBalance={tokenBalance}
+          onSwapComplete={handleSwapComplete}
+        />
+
+        <VaultModal
+          open={showVaultModal}
+          onOpenChange={setShowVaultModal}
+          currentBalance={tokenBalance}
+          onVaultAction={handleVaultAction}
+        />
       </div>
     </main>
   )
