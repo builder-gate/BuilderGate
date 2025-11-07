@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { WagmiConfig } from "@/providers/wagmi-provider"
 import { FarcasterProvider } from "@/contexts/FarcasterContext"
+import { SelfProvider } from "@/contexts/SelfContext"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -43,9 +44,11 @@ export default function RootLayout({
       <body className={`font-sans antialiased`} suppressHydrationWarning>
         <WagmiConfig>
           <FarcasterProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-              {children}
-            </ThemeProvider>
+            <SelfProvider>
+              <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                {children}
+              </ThemeProvider>
+            </SelfProvider>
           </FarcasterProvider>
         </WagmiConfig>
         <Analytics />

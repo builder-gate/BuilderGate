@@ -1,17 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { VerificationCard } from "@/components/verification-card"
 import { VerificationModal } from "@/components/verification-modal"
+import { SelfVerificationModal } from "@/components/self-verification-modal"
 import { TokenCard } from "@/components/token-card"
 import { TokenSwapModal } from "@/components/token-swap-modal"
 import { VaultModal } from "@/components/vault-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ConnectButton } from "@/components/ConnectButton"
 import { BuilderScoreCard } from "@/components/builder-score-card"
+import { useSelf } from "@/contexts/SelfContext"
 import { Shield, Zap, Users, TrendingUp } from "lucide-react"
 
 export default function Home() {
+  const { isVerified: selfVerified } = useSelf()
+
   const [verifications, setVerifications] = useState({
     talentProtocol: false,
     github: false,
@@ -24,6 +28,17 @@ export default function Home() {
   const [activeModal, setActiveModal] = useState<string | null>(null)
   const [showSwapModal, setShowSwapModal] = useState(false)
   const [showVaultModal, setShowVaultModal] = useState(false)
+  const [showSelfModal, setShowSelfModal] = useState(false)
+
+  // Update Self Protocol verification status from context
+  useEffect(() => {
+    if (selfVerified) {
+      setVerifications((prev) => ({
+        ...prev,
+        selfProtocol: true,
+      }))
+    }
+  }, [selfVerified])
 
   const platforms = [
     {
@@ -192,7 +207,13 @@ export default function Home() {
                 logo={platform.logo}
                 endpoint={platform.endpoint}
                 verified={verifications[platform.id as keyof typeof verifications]}
-                onVerify={() => setActiveModal(platform.id)}
+                onVerify={() => {
+                  if (platform.id === "selfProtocol") {
+                    setShowSelfModal(true)
+                  } else {
+                    setActiveModal(platform.id)
+                  }
+                }}
               />
             ))}
           </div>
@@ -209,16 +230,25 @@ export default function Home() {
         </div>
 
         {/* Verification Modals */}
-        {platforms.map((platform) => (
-          <VerificationModal
-            key={platform.id}
-            open={activeModal === platform.id}
-            onOpenChange={(open) => !open && setActiveModal(null)}
-            title={platform.title}
-            endpoint={platform.endpoint}
-            onSuccess={() => handleVerifySuccess(platform.id)}
-          />
-        ))}
+        {platforms
+          .filter((p) => p.id !== "selfProtocol")
+          .map((platform) => (
+            <VerificationModal
+              key={platform.id}
+              open={activeModal === platform.id}
+              onOpenChange={(open) => !open && setActiveModal(null)}
+              title={platform.title}
+              endpoint={platform.endpoint}
+              onSuccess={() => handleVerifySuccess(platform.id)}
+            />
+          ))}
+
+        {/* Self Protocol Modal */}
+        <SelfVerificationModal
+          open={showSelfModal}
+          onOpenChange={setShowSelfModal}
+          onSuccess={() => handleVerifySuccess("selfProtocol")}
+        />
 
         <TokenSwapModal
           open={showSwapModal}
