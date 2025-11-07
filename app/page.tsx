@@ -45,13 +45,13 @@ export default function Home() {
       id: "talentProtocol",
       title: "Talent Protocol",
       logo: "/images/talent-protocol.png",
-      endpoint: "/api/verify/talent-protocol",
+      endpoint: "/api/verify-talent",
     },
     {
       id: "github",
       title: "GitHub",
       logo: "/images/github.png",
-      endpoint: "/api/verify/github",
+      endpoint: "/api/verify-github",
     },
     {
       id: "selfProtocol",
