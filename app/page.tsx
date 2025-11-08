@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { VerificationCard } from "@/components/verification-card"
 import { VerificationModal } from "@/components/verification-modal"
 import { SelfVerificationModal } from "@/components/self-verification-modal"
+import { TalentVerificationModal } from "@/components/talent-verification-modal"
 import { TokenCard } from "@/components/token-card"
 import { TokenSwapModal } from "@/components/token-swap-modal"
 import { VaultModal } from "@/components/vault-modal"
@@ -29,6 +30,8 @@ export default function Home() {
   const [showSwapModal, setShowSwapModal] = useState(false)
   const [showVaultModal, setShowVaultModal] = useState(false)
   const [showSelfModal, setShowSelfModal] = useState(false)
+  const [showTalentModal, setShowTalentModal] = useState(false)
+  const [githubUsername, setGithubUsername] = useState<string | undefined>(undefined)
 
   // Update Self Protocol verification status from context
   useEffect(() => {
@@ -42,16 +45,16 @@ export default function Home() {
 
   const platforms = [
     {
-      id: "talentProtocol",
-      title: "Talent Protocol",
-      logo: "/images/talent-protocol.png",
-      endpoint: "/api/verify-talent",
-    },
-    {
       id: "github",
       title: "GitHub",
       logo: "/images/github.png",
       endpoint: "/api/verify-github",
+    },
+    {
+      id: "talentProtocol",
+      title: "Talent Protocol",
+      logo: "/images/talent-protocol.png",
+      endpoint: "/api/verify-talent",
     },
     {
       id: "selfProtocol",
@@ -63,11 +66,17 @@ export default function Home() {
 
   const allVerified = Object.values(verifications).every((v) => v)
 
-  const handleVerifySuccess = (platformId: string) => {
+  const handleVerifySuccess = (platformId: string, data?: any) => {
     setVerifications((prev) => ({
       ...prev,
       [platformId]: true,
     }))
+
+    // Store GitHub username for Talent Protocol verification
+    if (platformId === "github" && data?.username) {
+      setGithubUsername(data.username)
+    }
+
     const newVerifications = {
       ...verifications,
       [platformId]: true,
@@ -210,6 +219,8 @@ export default function Home() {
                 onVerify={() => {
                   if (platform.id === "selfProtocol") {
                     setShowSelfModal(true)
+                  } else if (platform.id === "talentProtocol") {
+                    setShowTalentModal(true)
                   } else {
                     setActiveModal(platform.id)
                   }
@@ -229,19 +240,23 @@ export default function Home() {
           />
         </div>
 
-        {/* Verification Modals */}
-        {platforms
-          .filter((p) => p.id !== "selfProtocol")
-          .map((platform) => (
-            <VerificationModal
-              key={platform.id}
-              open={activeModal === platform.id}
-              onOpenChange={(open) => !open && setActiveModal(null)}
-              title={platform.title}
-              endpoint={platform.endpoint}
-              onSuccess={() => handleVerifySuccess(platform.id)}
-            />
-          ))}
+        {/* GitHub Verification Modal */}
+        <VerificationModal
+          open={activeModal === "github"}
+          onOpenChange={(open) => !open && setActiveModal(null)}
+          title="GitHub"
+          endpoint="/api/verify-github"
+          onSuccess={(data) => handleVerifySuccess("github", data)}
+        />
+
+        {/* Talent Protocol Modal */}
+        <TalentVerificationModal
+          open={showTalentModal}
+          onOpenChange={setShowTalentModal}
+          githubVerified={verifications.github}
+          githubUsername={githubUsername}
+          onSuccess={() => handleVerifySuccess("talentProtocol")}
+        />
 
         {/* Self Protocol Modal */}
         <SelfVerificationModal
