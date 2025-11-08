@@ -9,9 +9,33 @@ export async function POST(request: NextRequest) {
     console.log(`[${requestId}] 🔗 Origin:`, request.headers.get('origin'))
 
     const body = await request.json()
-    const { username } = body
+    const { username, email, name, avatar, githubData } = body
 
-    console.log(`[${requestId}] 📦 Request body:`, { username })
+    console.log(`[${requestId}] 📦 Request body:`, {
+      username,
+      email: email ? '***@***' : null,
+      hasGithubData: !!githubData
+    })
+
+    // If githubData is provided (from OAuth), use it directly
+    if (githubData) {
+      console.log(`[${requestId}] ✅ Using OAuth-verified GitHub data`)
+
+      return NextResponse.json({
+        success: true,
+        message: 'GitHub verified via OAuth!',
+        data: {
+          platform: 'github',
+          username: githubData.username,
+          email: githubData.email,
+          name: githubData.name,
+          avatar: githubData.avatar,
+          rank: 'OAuth', // Rank from OAuth flow
+          verified: true,
+          timestamp: githubData.timestamp,
+        }
+      }, { status: 200 })
+    }
 
     if (!username) {
       console.log(`[${requestId}] ❌ Missing username in request`)

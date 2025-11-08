@@ -1,11 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { CheckCircle2, Loader2 } from "lucide-react"
+import { CheckCircle2, Loader2, Github } from "lucide-react"
 
 interface VerificationModalProps {
   open: boolean
@@ -18,57 +16,94 @@ interface VerificationModalProps {
 export function VerificationModal({ open, onOpenChange, title, endpoint, onSuccess }: VerificationModalProps) {
   const [status, setStatus] = useState<"idle" | "verifying" | "success" | "error">("idle")
   const [message, setMessage] = useState("")
-  const [username, setUsername] = useState("")
   const [proofData, setProofData] = useState<any>(null)
 
-  const handleVerify = async () => {
-    if (!username.trim()) {
+  const isGitHub = title === "GitHub"
+
+  // Listen for OAuth callback messages
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      // Security: verify origin in production
+      if (event.data.type === 'github-auth-success') {
+        console.log('✅ GitHub OAuth success:', event.data.data)
+        setStatus("verifying")
+        setMessage("Processing GitHub verification...")
+
+        try {
+          // Send OAuth data to backend
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ githubData: event.data.data })
+          })
+          const data = await res.json()
+
+          if (data.success) {
+            setStatus("success")
+            setMessage(data.message)
+            setProofData(data.data)
+            onSuccess(data.data)
+
+            // Auto-close after success animation
+            setTimeout(() => {
+              onOpenChange(false)
+              setStatus("idle")
+              setProofData(null)
+            }, 2000)
+          } else {
+            setStatus("error")
+            setMessage(data.message || "Verification failed")
+          }
+        } catch (err) {
+          console.error('Error processing GitHub data:', err)
+          setStatus("error")
+          setMessage("Failed to process GitHub verification")
+        }
+      } else if (event.data.type === 'github-auth-error') {
+        console.error('❌ GitHub OAuth error:', event.data.error)
+        setStatus("error")
+        setMessage(`GitHub authentication failed: ${event.data.error}`)
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [endpoint, onSuccess, onOpenChange])
+
+  const handleGitHubOAuth = () => {
+    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID
+    if (!clientId) {
       setStatus("error")
-      setMessage("Please enter a username")
+      setMessage("GitHub OAuth not configured")
       return
     }
 
     setStatus("verifying")
-    setMessage("")
+    setMessage("Opening GitHub authentication...")
 
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username: username.trim() })
-      })
-      const data = await res.json()
+    const redirectUri = `${window.location.origin}/api/auth/github/callback`
+    const scope = 'read:user user:email'
+    const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}`
 
-      if (data.success) {
-        setStatus("success")
-        setMessage(data.message)
-        setProofData(data.data)
-        onSuccess(data.data)
+    // Open popup window
+    const width = 600
+    const height = 700
+    const left = window.screen.width / 2 - width / 2
+    const top = window.screen.height / 2 - height / 2
 
-        // Auto-close after success animation
-        setTimeout(() => {
-          onOpenChange(false)
-          setStatus("idle")
-          setUsername("")
-          setProofData(null)
-        }, 2000)
-      } else {
-        setStatus("error")
-        setMessage(data.message || "Verification failed")
-      }
-    } catch {
-      setStatus("error")
-      setMessage("Network error occurred")
-    }
+    window.open(
+      authUrl,
+      'github-auth',
+      `width=${width},height=${height},left=${left},top=${top}`
+    )
   }
 
   const handleClose = (open: boolean) => {
     if (!open) {
       setStatus("idle")
       setMessage("")
-      setUsername("")
       setProofData(null)
     }
     onOpenChange(open)
@@ -80,7 +115,7 @@ export function VerificationModal({ open, onOpenChange, title, endpoint, onSucce
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            {status === "idle" && "Enter your username to start verification"}
+            {status === "idle" && "Connect your GitHub account to verify ownership"}
             {status === "verifying" && "Verifying your credentials..."}
             {status === "success" && "Successfully verified!"}
             {status === "error" && "Verification failed"}
@@ -88,27 +123,15 @@ export function VerificationModal({ open, onOpenChange, title, endpoint, onSucce
         </DialogHeader>
 
         <div className="flex flex-col gap-6 py-4">
-          {status === "idle" && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  placeholder={`Enter your ${title === "GitHub" ? "GitHub" : "GitHub"} username`}
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleVerify()}
-                  className="w-full"
-                />
-              </div>
-              <Button
-                onClick={handleVerify}
-                size="lg"
-                className="w-full bg-primary hover:bg-primary/90 text-black font-bold text-lg py-6"
-              >
-                Verify Now
-              </Button>
-            </>
+          {status === "idle" && isGitHub && (
+            <Button
+              onClick={handleGitHubOAuth}
+              size="lg"
+              className="w-full bg-[#24292e] hover:bg-[#1b1f23] text-white font-bold text-lg py-6 flex items-center justify-center gap-2"
+            >
+              <Github className="w-5 h-5" />
+              Sign in with GitHub
+            </Button>
           )}
 
           {status === "verifying" && (
@@ -117,7 +140,7 @@ export function VerificationModal({ open, onOpenChange, title, endpoint, onSucce
                 className="w-20 h-20 text-black dark:text-primary animate-spin"
                 style={{ color: "currentColor" }}
               />
-              <p className="text-lg font-semibold">Verifying {username}...</p>
+              <p className="text-lg font-semibold">Verifying your account...</p>
             </div>
           )}
 

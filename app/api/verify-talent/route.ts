@@ -16,10 +16,12 @@ export async function POST(request: NextRequest) {
     if (!username) {
       console.log(`[${requestId}] ❌ Missing username in request`)
       return NextResponse.json(
-        { success: false, message: 'Username is required' },
+        { success: false, message: 'GitHub username is required' },
         { status: 400 }
       )
     }
+
+    console.log(`[${requestId}] 📦 Looking up Talent Protocol score for:`, username)
 
     // Get API key from environment variables
     const apiKey = process.env.TALENT_API_KEY
