@@ -1,6 +1,6 @@
 # BuilderGate - Reputation-Gated Builder Vault
 
-A Farcaster Mini App implementing a **Reputation-Gated Builder Vault (RGBV)** that rewards verified builders based on their GitHub contributions and identity verification using zkProofs and on-chain attestations.
+A **Reputation-Gated Builder Vault (RGBV)** that rewards verified builders based on their GitHub contributions and identity verification using zkProofs and on-chain attestations.
 
 ## 🎯 Overview
 
@@ -10,7 +10,7 @@ BuilderGate combines DeFi yield distribution with developer reputation systems t
 - **zkProofs via Self Protocol** - Privacy-preserving identity verification (age 18+)
 - **GitHub Proof Generation** - Verifiable contribution metrics and rank scoring
 - **Talent Protocol** - Builder score and reputation validation
-- **Farcaster Mini App** - Seamless social authentication
+- **Farcaster Integration** - Social authentication and identity
 
 ## 🏗️ System Architecture
 
@@ -19,7 +19,7 @@ BuilderGate combines DeFi yield distribution with developer reputation systems t
 ```mermaid
 graph TB
     subgraph "Frontend Layer"
-        FA[Farcaster Mini App]
+        FA[Web Application]
         UI[Next.js 15 + React 19]
         WC[Wagmi v2 + Viem]
     end
@@ -186,7 +186,7 @@ graph TD
 ### Core Functionality
 
 1. **🔐 Multi-Wallet Support**
-   - Farcaster Mini App Connector (auto-activates in Farcaster)
+   - Farcaster Connector (auto-activates in Farcaster)
    - Injected wallets (MetaMask, Coinbase Wallet, etc.)
    - WalletConnect v2 (QR code & mobile wallets)
 
@@ -282,12 +282,13 @@ flowchart TD
 
 ## 🛠️ Tech Stack
 
-### Frontend (Farcaster Mini App)
+### Frontend
 
 - **Next.js 15**: React framework with App Router
-- **Wagmi v2**: React hooks for Ethereum (with Farcaster connector)
+- **React 19**: Latest React version
+- **Wagmi v2**: React hooks for Ethereum
 - **Viem**: TypeScript Ethereum library
-- **@farcaster/miniapp-sdk**: Official Farcaster SDK
+- **@farcaster/miniapp-sdk**: Farcaster SDK integration
 - **@selfxyz/core & @selfxyz/qrcode**: Self Protocol integration
 - **WalletConnect v2**: Web3 wallet connection
 - **Tailwind CSS v4**: Utility-first CSS framework
@@ -819,8 +820,8 @@ All UI primitives from shadcn/ui (built on Radix UI):
 ## 🗺️ Roadmap
 
 ### Phase 1: MVP ✅ (Current)
-- [x] Farcaster Mini App setup
-- [x] Multi-wallet integration
+- [x] Web application setup with Farcaster integration
+- [x] Multi-wallet support (Farcaster, Injected, WalletConnect)
 - [x] Self Protocol zkProof verification
 - [x] GitHub proof generation
 - [x] Talent Protocol integration
@@ -893,7 +894,7 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ## 🙏 Acknowledgments
 
-- [Farcaster](https://www.farcaster.xyz/) for the Mini App SDK
+- [Farcaster](https://www.farcaster.xyz/) for the SDK
 - [Self Protocol](https://www.self.xyz/) for zkProof infrastructure
 - [Wagmi](https://wagmi.sh/) for excellent React hooks
 - [shadcn/ui](https://ui.shadcn.com/) for beautiful components
