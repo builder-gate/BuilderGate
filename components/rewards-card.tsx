@@ -25,6 +25,7 @@ export function RewardsCard({ githubVerified, selfVerified }: RewardsCardProps) 
     phaseName,
     unclaimedRounds,
     hasUnclaimedRewards,
+    isAlreadyRegistered,
     handleRegister,
     isRegisterPending,
     isRegisterConfirming,
@@ -143,7 +144,18 @@ export function RewardsCard({ githubVerified, selfVerified }: RewardsCardProps) 
               </div>
             )}
 
-            {proofsCompleted && (
+            {isAlreadyRegistered && (
+              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                <p className="text-sm font-medium text-green-600 dark:text-green-500 mb-2">
+                  ✅ Already Registered
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  You are already registered for this round. Wait for the Active phase to complete and scores to be set.
+                </p>
+              </div>
+            )}
+
+            {proofsCompleted && !isAlreadyRegistered && (
               <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
                 <p className="text-sm font-medium mb-2">📝 Registration Open</p>
                 <p className="text-sm text-muted-foreground">
@@ -154,7 +166,7 @@ export function RewardsCard({ githubVerified, selfVerified }: RewardsCardProps) 
 
             <Button
               onClick={handleRegister}
-              disabled={!proofsCompleted || isRegisterPending || isRegisterConfirming}
+              disabled={!proofsCompleted || isAlreadyRegistered || isRegisterPending || isRegisterConfirming}
               className="w-full"
               size="lg"
             >
@@ -163,6 +175,8 @@ export function RewardsCard({ githubVerified, selfVerified }: RewardsCardProps) 
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   {isRegisterConfirming ? 'Confirming...' : 'Registering...'}
                 </>
+              ) : isAlreadyRegistered ? (
+                'Already Registered'
               ) : (
                 'Register for Round'
               )}

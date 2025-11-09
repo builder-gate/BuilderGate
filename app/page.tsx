@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useAccount } from "wagmi"
 import { VerificationCard } from "@/components/verification-card"
 import { VerificationModal } from "@/components/verification-modal"
 import { SelfVerificationModal } from "@/components/self-verification-modal"
@@ -10,10 +11,13 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { ConnectButton } from "@/components/ConnectButton"
 import { BuilderScoreCard } from "@/components/builder-score-card"
 import { useSelf } from "@/contexts/SelfContext"
+import { useReputationSplitter } from "@/hooks/useReputationSplitter"
 import { Shield, Zap, Users, TrendingUp } from "lucide-react"
 
 export default function Home() {
+  const { address, isConnected } = useAccount()
   const { isVerified: selfVerified } = useSelf()
+  const { isAlreadyRegistered } = useReputationSplitter()
 
   const [verifications, setVerifications] = useState({
     talentProtocol: false,
@@ -28,7 +32,20 @@ export default function Home() {
   const [showTalentModal, setShowTalentModal] = useState(false)
   const [githubUsername, setGithubUsername] = useState<string | undefined>(undefined)
 
-  // Update Self Protocol verification status from context
+  // Reset verifications when wallet disconnects or changes
+  useEffect(() => {
+    if (!isConnected || !address) {
+      setVerifications({
+        talentProtocol: false,
+        github: false,
+        selfProtocol: false,
+      })
+      setBuilderScore(0)
+      setGithubUsername(undefined)
+    }
+  }, [isConnected, address])
+
+  // Update verification status from context and contract
   useEffect(() => {
     if (selfVerified) {
       setVerifications((prev) => ({
@@ -37,6 +54,19 @@ export default function Home() {
       }))
     }
   }, [selfVerified])
+
+  // Update verification status from contract if already registered
+  useEffect(() => {
+    if (isAlreadyRegistered) {
+      // If registered, they've already completed both required proofs
+      // We assume they also completed Talent Protocol (or it's optional)
+      setVerifications({
+        github: true,
+        selfProtocol: true,
+        talentProtocol: true, // Assume completed if registered
+      })
+    }
+  }, [isAlreadyRegistered])
 
   const platforms = [
     {
