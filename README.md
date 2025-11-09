@@ -134,9 +134,9 @@ graph TD
     end
 
     subgraph "API Layer"
-        API1[/api/verify-self<br/>zkProof Verification]
-        API2[/api/proof/github<br/>GitHub Rank]
-        API3[/api/proof/talent<br/>Builder Score]
+        API1["api/verify-self<br/>zkProof Verification"]
+        API2["api/proof/github<br/>GitHub Rank"]
+        API3["api/proof/talent<br/>Builder Score"]
     end
 
     subgraph "External Services"
