@@ -26,6 +26,7 @@ export function RewardsCard({ githubVerified, selfVerified }: RewardsCardProps) 
     unclaimedRounds,
     hasUnclaimedRewards,
     isAlreadyRegistered,
+    hasAlreadyClaimed,
     handleRegister,
     isRegisterPending,
     isRegisterConfirming,
@@ -212,7 +213,18 @@ export function RewardsCard({ githubVerified, selfVerified }: RewardsCardProps) 
               </p>
             </div>
 
-            {hasUnclaimedRewards && (
+            {hasAlreadyClaimed && (
+              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                <p className="text-sm font-medium text-green-600 dark:text-green-500 mb-2">
+                  ✅ Already Claimed
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  You have already claimed your rewards for this round.
+                </p>
+              </div>
+            )}
+
+            {!hasAlreadyClaimed && hasUnclaimedRewards && (
               <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
                 <p className="text-sm font-medium mb-2">💰 ETH Available</p>
                 <p className="text-sm text-muted-foreground mb-3">
@@ -230,7 +242,7 @@ export function RewardsCard({ githubVerified, selfVerified }: RewardsCardProps) 
 
             <Button
               onClick={handleClaim}
-              disabled={!hasUnclaimedRewards || isClaimPending || isClaimConfirming}
+              disabled={hasAlreadyClaimed || !hasUnclaimedRewards || isClaimPending || isClaimConfirming}
               className="w-full"
               size="lg"
             >
@@ -239,6 +251,8 @@ export function RewardsCard({ githubVerified, selfVerified }: RewardsCardProps) 
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   {isClaimConfirming ? 'Confirming...' : 'Withdrawing...'}
                 </>
+              ) : hasAlreadyClaimed ? (
+                'Already Claimed'
               ) : (
                 <>
                   <Wallet className="w-4 h-4 mr-2" />
@@ -247,7 +261,7 @@ export function RewardsCard({ githubVerified, selfVerified }: RewardsCardProps) 
               )}
             </Button>
 
-            {!hasUnclaimedRewards && (
+            {!hasUnclaimedRewards && !hasAlreadyClaimed && (
               <p className="text-center text-sm text-muted-foreground">
                 No ETH to withdraw at this time
               </p>

@@ -183,6 +183,11 @@
         "internalType": "string",
         "name": "selfProof",
         "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "claimed",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
