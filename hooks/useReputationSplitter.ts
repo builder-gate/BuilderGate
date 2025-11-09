@@ -41,13 +41,15 @@ export function useReputationSplitter() {
     },
   })
 
-  // Debug: Log registered developers
-  console.log('🔍 getRegisteredDevs:', {
-    walletAddress: address,
-    registeredDevs: registeredDevs as `0x${string}`[] | undefined,
-    isRegistered: address && registeredDevs
-      ? (registeredDevs as `0x${string}`[]).map(a => a.toLowerCase()).includes(address.toLowerCase())
-      : false,
+  // Get dev info (includes claimed status)
+  const { data: devInfo, refetch: refetchDevInfo } = useReadContract({
+    address: contractAddress,
+    abi: ReputationSplitterABI,
+    functionName: 'getDevInfo',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address && !!contractAddress,
+    },
   })
 
   // Read reward pool for specific round
@@ -106,29 +108,70 @@ export function useReputationSplitter() {
     data: claimHash,
     isPending: isClaimPending,
     error: claimError,
+    status: claimStatus,
   } = useWriteContract()
 
+  // Log claim write status
+  if (claimStatus) {
+    console.log('📊 Claim status:', claimStatus)
+  }
+  if (claimError) {
+    console.error('🚨 Claim write error:', claimError)
+  }
+
   const handleClaim = async () => {
-    if (!contractAddress) return
+    if (!contractAddress) {
+      console.log('❌ No contract address available')
+      return
+    }
+
+    console.log('🔄 Initiating claim transaction...')
+    console.log('Contract:', contractAddress)
+    console.log('Unclaimed rounds:', unclaimedRounds)
+    console.log('Has unclaimed rewards:', (unclaimedRounds as bigint[] | undefined)?.length ?? 0 > 0)
+
     try {
-      await claim({
+      const tx = await claim({
         address: contractAddress,
         abi: ReputationSplitterABI,
         functionName: 'claim',
+        gas: BigInt(500000), // Set reasonable gas limit (500k)
       })
-    } catch (error) {
-      // Silently handle wallet popup closure errors
-      console.error('Claim error:', error)
+      console.log('✅ Transaction sent:', tx)
+    } catch (error: any) {
+      console.error('❌ Claim error:', error)
+      console.error('Error message:', error?.message)
+      console.error('Error code:', error?.code)
+      console.error('Error data:', error?.data)
     }
   }
 
   // Wait for claim transaction
-  const { isLoading: isClaimConfirming, isSuccess: isClaimSuccess } = useWaitForTransactionReceipt({
+  const {
+    isLoading: isClaimConfirming,
+    isSuccess: isClaimSuccess,
+    isError: isClaimTxError,
+    error: claimTxError
+  } = useWaitForTransactionReceipt({
     hash: claimHash,
     query: {
       enabled: !!claimHash,
     },
   })
+
+  // Log transaction status changes
+  if (claimHash) {
+    console.log('📋 Transaction hash:', claimHash)
+  }
+  if (isClaimConfirming) {
+    console.log('⏳ Waiting for transaction confirmation...')
+  }
+  if (isClaimSuccess) {
+    console.log('✅ Transaction confirmed successfully!')
+  }
+  if (isClaimTxError) {
+    console.error('❌ Transaction failed:', claimTxError)
+  }
 
   // Helper to get phase name
   const getPhaseName = (phase: number | undefined) => {
@@ -151,12 +194,17 @@ export function useReputationSplitter() {
     refetchRound()
     refetchUnclaimed()
     refetchRegisteredDevs()
+    refetchDevInfo()
   }
 
   // Check if user is already registered (check if address is in registeredDevs array)
   const isAlreadyRegistered = address && registeredDevs
     ? (registeredDevs as `0x${string}`[]).map(a => a.toLowerCase()).includes(address.toLowerCase())
     : false
+
+  // Check if user already claimed rewards (from getDevInfo)
+  // devInfo returns: [registered, githubProof, selfProof, claimed]
+  const hasAlreadyClaimed = devInfo ? (devInfo as boolean[])[3] : false
 
   return {
     // Contract info
@@ -169,6 +217,7 @@ export function useReputationSplitter() {
     unclaimedRounds: unclaimedRounds as bigint[] | undefined,
     hasUnclaimedRewards: (unclaimedRounds as bigint[] | undefined)?.length ?? 0 > 0,
     isAlreadyRegistered,
+    hasAlreadyClaimed,
     registeredDevs: registeredDevs as `0x${string}`[] | undefined,
 
     // Hooks for specific queries
