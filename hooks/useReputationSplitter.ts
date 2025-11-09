@@ -31,6 +31,25 @@ export function useReputationSplitter() {
     },
   })
 
+  // Get list of all registered developers (simpler than getDevInfo)
+  const { data: registeredDevs, refetch: refetchRegisteredDevs } = useReadContract({
+    address: contractAddress,
+    abi: ReputationSplitterABI,
+    functionName: 'getRegisteredDevs',
+    query: {
+      enabled: !!contractAddress,
+    },
+  })
+
+  // Debug: Log registered developers
+  console.log('🔍 getRegisteredDevs:', {
+    walletAddress: address,
+    registeredDevs: registeredDevs as `0x${string}`[] | undefined,
+    isRegistered: address && registeredDevs
+      ? (registeredDevs as `0x${string}`[]).map(a => a.toLowerCase()).includes(address.toLowerCase())
+      : false,
+  })
+
   // Read reward pool for specific round
   const useRoundRewardPool = (round: number) => {
     return useReadContract({
@@ -59,18 +78,26 @@ export function useReputationSplitter() {
     error: registerError,
   } = useWriteContract()
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!contractAddress) return
-    register({
-      address: contractAddress,
-      abi: ReputationSplitterABI,
-      functionName: 'register',
-    })
+    try {
+      await register({
+        address: contractAddress,
+        abi: ReputationSplitterABI,
+        functionName: 'register',
+      })
+    } catch (error) {
+      // Silently handle wallet popup closure errors
+      console.error('Registration error:', error)
+    }
   }
 
   // Wait for register transaction
   const { isLoading: isRegisterConfirming, isSuccess: isRegisterSuccess } = useWaitForTransactionReceipt({
     hash: registerHash,
+    query: {
+      enabled: !!registerHash,
+    },
   })
 
   // Write: Claim rewards
@@ -81,18 +108,26 @@ export function useReputationSplitter() {
     error: claimError,
   } = useWriteContract()
 
-  const handleClaim = () => {
+  const handleClaim = async () => {
     if (!contractAddress) return
-    claim({
-      address: contractAddress,
-      abi: ReputationSplitterABI,
-      functionName: 'claim',
-    })
+    try {
+      await claim({
+        address: contractAddress,
+        abi: ReputationSplitterABI,
+        functionName: 'claim',
+      })
+    } catch (error) {
+      // Silently handle wallet popup closure errors
+      console.error('Claim error:', error)
+    }
   }
 
   // Wait for claim transaction
   const { isLoading: isClaimConfirming, isSuccess: isClaimSuccess } = useWaitForTransactionReceipt({
     hash: claimHash,
+    query: {
+      enabled: !!claimHash,
+    },
   })
 
   // Helper to get phase name
@@ -115,7 +150,13 @@ export function useReputationSplitter() {
     refetchPhase()
     refetchRound()
     refetchUnclaimed()
+    refetchRegisteredDevs()
   }
+
+  // Check if user is already registered (check if address is in registeredDevs array)
+  const isAlreadyRegistered = address && registeredDevs
+    ? (registeredDevs as `0x${string}`[]).map(a => a.toLowerCase()).includes(address.toLowerCase())
+    : false
 
   return {
     // Contract info
@@ -127,6 +168,8 @@ export function useReputationSplitter() {
     // User data
     unclaimedRounds: unclaimedRounds as bigint[] | undefined,
     hasUnclaimedRewards: (unclaimedRounds as bigint[] | undefined)?.length ?? 0 > 0,
+    isAlreadyRegistered,
+    registeredDevs: registeredDevs as `0x${string}`[] | undefined,
 
     // Hooks for specific queries
     useRoundRewardPool,

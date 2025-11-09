@@ -167,6 +167,48 @@
         "type": "address"
       }
     ],
+    "name": "getDevInfo",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "registered",
+        "type": "bool"
+      },
+      {
+        "internalType": "string",
+        "name": "githubProof",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "selfProof",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getRegisteredDevs",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "dev",
+        "type": "address"
+      }
+    ],
     "name": "getUnclaimedRounds",
     "outputs": [
       {
