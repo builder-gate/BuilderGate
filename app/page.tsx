@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useAccount } from "wagmi"
+import Image from "next/image"
 import { VerificationCard } from "@/components/verification-card"
 import { VerificationModal } from "@/components/verification-modal"
 import { SelfVerificationModal } from "@/components/self-verification-modal"
@@ -124,9 +125,12 @@ export default function Home() {
           </div>
 
           <div className="flex items-center justify-center gap-3 mb-4 pt-10">
-            <Shield
-              className="w-10 h-10 [&>path]:stroke-black dark:[&>path]:stroke-transparent"
-              style={{ fill: "#f4ff00", strokeWidth: 2 }}
+            <Image
+              src="/logo.png"
+              alt="BuilderGate Logo"
+              width={60}
+              height={60}
+              className="w-24 h-24"
             />
             <h1 className="text-5xl font-bold tracking-tight">BuilderGate</h1>
           </div>
