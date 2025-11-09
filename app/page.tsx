@@ -5,9 +5,7 @@ import { VerificationCard } from "@/components/verification-card"
 import { VerificationModal } from "@/components/verification-modal"
 import { SelfVerificationModal } from "@/components/self-verification-modal"
 import { TalentVerificationModal } from "@/components/talent-verification-modal"
-import { TokenCard } from "@/components/token-card"
-import { TokenSwapModal } from "@/components/token-swap-modal"
-import { VaultModal } from "@/components/vault-modal"
+import { RewardsCard } from "@/components/rewards-card"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ConnectButton } from "@/components/ConnectButton"
 import { BuilderScoreCard } from "@/components/builder-score-card"
@@ -23,12 +21,9 @@ export default function Home() {
     selfProtocol: false,
   })
 
-  const [tokenBalance, setTokenBalance] = useState(1000)
   const [builderScore, setBuilderScore] = useState(0)
 
   const [activeModal, setActiveModal] = useState<string | null>(null)
-  const [showSwapModal, setShowSwapModal] = useState(false)
-  const [showVaultModal, setShowVaultModal] = useState(false)
   const [showSelfModal, setShowSelfModal] = useState(false)
   const [showTalentModal, setShowTalentModal] = useState(false)
   const [githubUsername, setGithubUsername] = useState<string | undefined>(undefined)
@@ -87,17 +82,6 @@ export default function Home() {
     }
   }
 
-  const handleSwapComplete = (newBalance: number) => {
-    setTokenBalance(newBalance)
-  }
-
-  const handleVaultAction = (action: "stake" | "unstake", amount: number) => {
-    if (action === "stake") {
-      setTokenBalance((prev) => prev - amount)
-    } else {
-      setTokenBalance((prev) => prev + amount)
-    }
-  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -230,13 +214,11 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Token Card */}
+        {/* Rewards */}
         <div className="max-w-2xl mx-auto">
-          <TokenCard
-            enabled={allVerified}
-            balance={tokenBalance}
-            onSwapClick={() => setShowSwapModal(true)}
-            onVaultClick={() => setShowVaultModal(true)}
+          <RewardsCard
+            githubVerified={verifications.github}
+            selfVerified={verifications.selfProtocol}
           />
         </div>
 
@@ -263,20 +245,6 @@ export default function Home() {
           open={showSelfModal}
           onOpenChange={setShowSelfModal}
           onSuccess={() => handleVerifySuccess("selfProtocol")}
-        />
-
-        <TokenSwapModal
-          open={showSwapModal}
-          onOpenChange={setShowSwapModal}
-          currentBalance={tokenBalance}
-          onSwapComplete={handleSwapComplete}
-        />
-
-        <VaultModal
-          open={showVaultModal}
-          onOpenChange={setShowVaultModal}
-          currentBalance={tokenBalance}
-          onVaultAction={handleVaultAction}
         />
       </div>
     </main>

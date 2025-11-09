@@ -1,19 +1,11 @@
 import { http, createConfig } from 'wagmi'
-import { base, baseSepolia, mainnet } from 'wagmi/chains'
+import { sepolia } from 'wagmi/chains'
 import { farcasterMiniApp } from '@farcaster/miniapp-wagmi-connector'
 import { walletConnect, injected } from 'wagmi/connectors'
 
-// Get chain configuration from environment variables
-const TARGET_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || "8453")
-
-// Select the appropriate chain based on the chain ID
-const targetChain = TARGET_CHAIN_ID === 8453 ? base : baseSepolia
-
-// Create transports object with proper typing for all chains
+// Only Ethereum Sepolia network - ReputationSplitter is deployed here
 const transports = {
-  [base.id]: http(),
-  [baseSepolia.id]: http(),
-  [mainnet.id]: http(),
+  [sepolia.id]: http(),
 } as const
 
 // WalletConnect project ID is required for WalletConnect v2
@@ -44,9 +36,9 @@ const connectors = [
   }),
 ]
 
-// Create wagmi config with all chains and connectors
+// Create wagmi config with Sepolia only
 export const config = createConfig({
-  chains: [targetChain, base, baseSepolia, mainnet],
+  chains: [sepolia],
   transports,
   connectors,
 })
