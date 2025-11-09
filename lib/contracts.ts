@@ -3,7 +3,7 @@ import { sepolia } from 'wagmi/chains'
 // Contract addresses - Only Sepolia network
 export const CONTRACTS = {
   [sepolia.id]: {
-    ReputationSplitter: '0x652cc79a37Ef6c9CD76179c6238A6C4CC3018493' as `0x${string}`,
+    ReputationSplitter: '0xc0ca4e370040C15Df77b83F7d2fD52F1a79631F0' as `0x${string}`,
   },
 } as const
 

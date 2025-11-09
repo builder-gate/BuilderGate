@@ -47,13 +47,22 @@ export function RewardsCard({ githubVerified, selfVerified }: RewardsCardProps) 
     }
   }, [isRegisterSuccess, isClaimSuccess, refetchAll])
 
+  // Dynamic title based on current phase
+  const getCardTitle = () => {
+    if (!isConnected || !contractAddress) return "Withdraw ETH"
+    if (currentPhase === 0) return "Register for Round"
+    if (currentPhase === 1) return "Rewards in Progress"
+    if (currentPhase === 2) return "Withdraw ETH"
+    return "Withdraw ETH"
+  }
+
   if (!isConnected) {
     return (
       <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Wallet className="w-5 h-5 text-primary" />
-            Withdraw ETH
+            {getCardTitle()}
           </CardTitle>
           <CardDescription>Connect your wallet to withdraw earnings</CardDescription>
         </CardHeader>
@@ -68,7 +77,7 @@ export function RewardsCard({ githubVerified, selfVerified }: RewardsCardProps) 
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Wallet className="w-5 h-5 text-primary" />
-            Withdraw ETH
+            {getCardTitle()}
           </CardTitle>
           <CardDescription>Switch to Ethereum Sepolia to withdraw earnings</CardDescription>
         </CardHeader>
@@ -104,7 +113,7 @@ export function RewardsCard({ githubVerified, selfVerified }: RewardsCardProps) 
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Wallet className="w-5 h-5 text-primary" />
-          Withdraw ETH
+          {getCardTitle()}
         </CardTitle>
         <CardDescription>Withdraw your reputation-based ETH earnings</CardDescription>
       </CardHeader>

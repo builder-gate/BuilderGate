@@ -41,7 +41,7 @@ graph TB
     subgraph "Blockchain Layer"
         RS[ReputationSplitter.sol]
         BC[Ethereum Sepolia Testnet]
-        RS_ADDR["0x652cc79a37Ef6c9CD76179c6238A6C4CC3018493"]
+        RS_ADDR["0xc0ca4e370040C15Df77b83F7d2fD52F1a79631F0"]
     end
 
     subgraph "External Services"
@@ -299,7 +299,7 @@ flowchart TD
 
 - **Solidity 0.8.x**: Smart contract language
 - **ReputationSplitter.sol**: Main contract on Ethereum Sepolia
-  - Address: `0x652cc79a37Ef6c9CD76179c6238A6C4CC3018493`
+  - Address: `0xc0ca4e370040C15Df77b83F7d2fD52F1a79631F0`
   - Chain ID: 11155111
   - Features: Registration, proof submission, reward claiming, phase management
 
@@ -321,7 +321,7 @@ flowchart TD
 ### Network Support
 
 - **Ethereum Sepolia Testnet** (Chain ID: 11155111) - Current deployment
-  - Contract: `0x652cc79a37Ef6c9CD76179c6238A6C4CC3018493`
+  - Contract: `0xc0ca4e370040C15Df77b83F7d2fD52F1a79631F0`
   - Faucet: [sepoliafaucet.com](https://sepoliafaucet.com/)
 - **Future**: Ethereum Mainnet deployment
 
@@ -736,7 +736,7 @@ flowchart LR
 
 ### ReputationSplitter.sol
 
-**Deployed on Ethereum Sepolia**: `0x652cc79a37Ef6c9CD76179c6238A6C4CC3018493`
+**Deployed on Ethereum Sepolia**: `0xc0ca4e370040C15Df77b83F7d2fD52F1a79631F0`
 **Chain ID**: 11155111
 
 **Key Functions**:
@@ -911,7 +911,7 @@ For questions and support:
 ## 🔗 Links
 
 - **Live Demo**: [buildergate.vercel.app](https://buildergate.vercel.app)
-- **Contract Explorer**: [Sepolia Etherscan](https://sepolia.etherscan.io/address/0x652cc79a37Ef6c9CD76179c6238A6C4CC3018493)
+- **Contract Explorer**: [Sepolia Etherscan](https://sepolia.etherscan.io/address/0xc0ca4e370040C15Df77b83F7d2fD52F1a79631F0)
 - **Sepolia Faucet**: [sepoliafaucet.com](https://sepoliafaucet.com/)
 - **Documentation**: Coming soon
 - **Twitter**: [@BuilderGate](https://twitter.com/buildergate)

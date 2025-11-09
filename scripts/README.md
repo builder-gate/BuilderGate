@@ -6,7 +6,7 @@ Scripts for managing the ReputationSplitter smart contract on Ethereum Sepolia.
 
 1. **Owner Private Key**: Set `OWNER_PRIVATE_KEY` in `.env` file
 2. **Network**: Scripts run on Ethereum Sepolia (chain ID: 11155111)
-3. **Contract**: `0x652cc79a37Ef6c9CD76179c6238A6C4CC3018493`
+3. **Contract**: `0xc0ca4e370040C15Df77b83F7d2fD52F1a79631F0`
 
 ## Available Scripts
 
@@ -97,7 +97,7 @@ Registration (0) → Active (1) → Distribution (2) → Registration (0) [new r
 $ npm run phase:start-active
 
 🔐 Using account: 0x1234...5678
-📝 Contract: 0x652cc79a37Ef6c9CD76179c6238A6C4CC3018493
+📝 Contract: 0xc0ca4e370040C15Df77b83F7d2fD52F1a79631F0
 🌐 Network: Ethereum Sepolia
 
 📊 Current Phase: 0 (Registration)
@@ -162,7 +162,7 @@ Some operations must be done manually on Etherscan:
 
 After moving to Active phase, set scores for registered developers:
 
-1. Go to: https://sepolia.etherscan.io/address/0x652cc79a37Ef6c9CD76179c6238A6C4CC3018493#writeContract
+1. Go to: https://sepolia.etherscan.io/address/0xc0ca4e370040C15Df77b83F7d2fD52F1a79631F0#writeContract
 2. Connect wallet with owner account
 3. Find `setScores` function
 4. Input:

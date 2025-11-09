@@ -24,7 +24,7 @@ import ReputationSplitterABI from '../lib/abis/ReputationSplitter.json'
 // Load environment variables
 dotenv.config()
 
-const CONTRACT_ADDRESS = '0x652cc79a37Ef6c9CD76179c6238A6C4CC3018493' as `0x${string}`
+const CONTRACT_ADDRESS = '0xc0ca4e370040C15Df77b83F7d2fD52F1a79631F0' as `0x${string}`
 
 async function main() {
   // Validate private key
